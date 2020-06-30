@@ -1,7 +1,5 @@
-import { LedState } from ".";
-import { Beat } from "./integration";
-import { HSVtoRGB, scale } from "./utils";
-
+import { HSVtoRGB, scale, TimeIndexableBeats } from "./utils";
+import { LedState } from "./vis";
 interface AnimationOptions {
   /**
    * The duration of each frame in seconds, e.g 60 FPS => frameTimeSeconds === 1/60s
@@ -20,7 +18,7 @@ interface AnimationOptions {
    * The number of leds that is being controlled
    */
   numLeds: number;
-  beats: Beat[];
+  beats?: TimeIndexableBeats;
 }
 
 /**
@@ -84,15 +82,19 @@ export const pulse = createAnimationHelper(({ animationPercent, state }) => {
 
 export const pulseBeat = createAnimationHelper(
   ({ animationPercent, state, beats, secondsPassed }) => {
-    const nextBeatIdx = beats.findIndex((b) => {
-      return b.start > secondsPassed;
-    });
-    const currBeat = beats[nextBeatIdx === 0 ? 0 : nextBeatIdx - 1];
-    const { start, duration } = currBeat;
-    console.log({ nextBeatIdx, secondsPassed, currBeat });
+    if (!beats) {
+      throw Error("No beats array found");
+    }
 
-    const scaleVal = Math.min(1, (secondsPassed - start) / (duration / 2));
+    const currBeat = beats?.getBeat();
+    if (!currBeat) {
+      throw Error("Beats array finished");
+    }
 
-    return state.map((v) => scale(v, scaleVal));
+    const { progress, start, duration, confidence } = currBeat;
+    console.log(currBeat);
+    const scaleVal2 = Math.min(1, (progress - start) / duration);
+
+    return state.map((v) => scale(v, scaleVal2));
   }
 );

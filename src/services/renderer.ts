@@ -1,6 +1,6 @@
 import SerialPort from "serialport";
-import { LedState } from ".";
 import { clamp, round } from "./utils";
+import { LedState } from "./vis";
 
 function stateToBuffer(state: LedState): Buffer {
   return Buffer.from(
@@ -9,7 +9,7 @@ function stateToBuffer(state: LedState): Buffer {
 }
 
 export function createRenderer() {
-  const sp = new SerialPort("/dev/cu.usbmodem2101", { baudRate: 2_000_000 });
+  const sp = new SerialPort("/dev/cu.usbmodem143301", { baudRate: 2_000_000 });
   function render(state: LedState) {
     const buf = stateToBuffer(state);
     sp.write(buf);

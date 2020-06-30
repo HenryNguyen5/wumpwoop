@@ -13,15 +13,7 @@ import {
   tap,
 } from "rxjs/operators";
 import SpotifyWebApi from "spotify-web-api-node";
-import {
-  createAuthorizeUrl,
-  Errors,
-  getAuthConfig,
-  getDb,
-  refreshAccessToken,
-  ServerStepType,
-  setupAuthCallbackServer,
-} from "../services/spotify";
+import { ServerStepType } from "../services/spotifyTypes";
 
 const cmdOptions = ["config:edit", "config:show", "start"] as const;
 export default class Spotify extends Command {
@@ -42,47 +34,45 @@ export default class Spotify extends Command {
 
   async run() {
     const { args } = this.parse(Spotify);
+    const { container } = await import("tsyringe");
+    const { SpotifyService } = await import("../services/spotify");
+
+    const spotifyService = container.resolve(SpotifyService);
     switch (args.cmd as typeof cmdOptions[number]) {
       case "config:show": {
-        await this.printClientCredentials();
+        await this.printClientCredentials(spotifyService);
         break;
       }
       case "config:edit": {
-        await this.configureClientCredentials();
+        await this.configureClientCredentials(spotifyService);
         break;
       }
       case "start": {
-        const api = await this.getApi();
-
+        const api = await this.getApi(spotifyService);
+        await spotifyService.startVis(api);
         break;
       }
     }
-    // const name = flags.name ?? "world";
-    // this.log(`hello ${name} from ./src/commands/hello.ts`);
-    // if (args.file && flags.force) {
-    //   this.log(`you input --force and --file: ${args.file}`);
-    // }
   }
 
-  async startVis() {
-    const conf = getAuthConfig();
-  }
-
-  async printClientCredentials() {
-    const conf = getAuthConfig().client;
+  async printClientCredentials(
+    service: import("../services/spotify").SpotifyService
+  ) {
+    const conf = service.getClientCredentials();
     this.log("Current client config");
     cli.styledJSON(conf);
   }
 
-  async configureClientCredentials() {
-    const conf = getAuthConfig();
+  async configureClientCredentials(
+    service: import("../services/spotify").SpotifyService
+  ) {
+    const conf = service.getClientCredentials();
     const toHeader = (v: string) =>
       changeCase.headerCase(v, { delimiter: " " });
-    const choices = Object.entries(conf.client).map(([k, v]) => ({
+    const choices = Object.entries(conf).map(([k, v]) => ({
       name: `${toHeader(k)} ${v ? `[${v}]` : ""}`,
       value: k,
     }));
-    const db = getDb();
 
     const answer = await inquirer.prompt([
       {
@@ -97,49 +87,42 @@ export default class Spotify extends Command {
         type: "input",
       },
     ]);
-    const trimmedValue = (answer.value as string).trim();
-    const dbKey = `spotify.auth.client.${answer.key}`;
-
-    if (!trimmedValue) {
-      return this.log(
-        `No value entered, defaulting ${toHeader(answer.key)} to ${db.get(
-          dbKey
-        )}`
-      );
+    if (!service.setClientValue(answer.key, answer.value)) {
+      return this.log(`No value entered, ignoring`);
     }
-
-    db.set(dbKey, answer.value).write();
-    this.log(
-      `Value of ${toHeader(answer.key)} has been set to ${db.get(dbKey)}`
-    );
   }
 
-  async getApi(): Promise<SpotifyWebApi> {
-    const conf = getAuthConfig();
+  async getApi(
+    service: import("../services/spotify").SpotifyService
+  ): Promise<SpotifyWebApi> {
     const spotifyApi = new SpotifyWebApi({
-      ...conf.client,
-      ...conf.tokens,
+      ...service.getClientCredentials(),
+      ...service.getTokenCredentials(),
     });
 
     // refresh our tokens on the api instance
-    return refreshAccessToken(spotifyApi)
+    return service
+      .refreshAccessToken(spotifyApi)
       .pipe(
         catchError((e) => {
           // if it fails, do auth flow to get new token
-          if ((e as Error).message === Errors.REFRESH_ERROR) {
-            const url = createAuthorizeUrl(spotifyApi);
+          if (service.isRefreshError(e)) {
+            const url = service.createAuthorizeUrl(spotifyApi);
             cli.url(`Click here to authorize with spotify ${url}`, url);
-            return this.authorizeWithSpotify(spotifyApi);
+            return this.authorizeWithSpotify(service, spotifyApi);
           }
-          throw Error(Errors.UNKNOWN);
+          service.throwUnknownError();
         }),
         mapTo(spotifyApi)
       )
       .toPromise();
   }
 
-  private authorizeWithSpotify(spotifyApi: SpotifyWebApi) {
-    return setupAuthCallbackServer().pipe(
+  private authorizeWithSpotify(
+    service: import("../services/spotify").SpotifyService,
+    spotifyApi: SpotifyWebApi
+  ) {
+    return service.setupAuthCallbackServer().pipe(
       tap((x) => {
         switch (x.type) {
           case ServerStepType.CLOSED: {
@@ -155,7 +138,7 @@ export default class Spotify extends Command {
             break;
           }
           default: {
-            throw Error(Errors.UNKNOWN);
+            service.throwUnknownError();
           }
         }
       }),
@@ -169,15 +152,12 @@ export default class Spotify extends Command {
       }),
       flatMap((code) => spotifyApi.authorizationCodeGrant(code)),
       map((data) =>
-        Object.entries(data.body).map(([k, v]) => [changeCase.camelCase(k), v])
+        Object.entries(data.body).map(([k, v]: [string, string]) => [
+          changeCase.camelCase(k),
+          v,
+        ])
       ),
-      tap((data) => {
-        const db = getDb();
-        data.forEach(([k, v]) => {
-          const dbKey = `spotify.auth.tokens.${k}`;
-          db.set(dbKey, v).write();
-        });
-      })
+      tap((t) => service.setTokens(t))
     );
   }
 }

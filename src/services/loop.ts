@@ -1,7 +1,7 @@
-import { AppConfig, LedState } from ".";
 import { RGB } from "./colours";
 import { createRenderer } from "./renderer";
 import { time } from "./utils";
+import { AppConfig, LedState } from "./vis";
 
 export type Integration = (
   timePassed: number,
