@@ -61,6 +61,9 @@ export function rgb2hsv(r: number, g: number, b: number) {
     } else if (babs === v) {
       h = 2 / 3 + gg - rr;
     }
+    if (!h) {
+      throw Error("No hue value");
+    }
     if (h < 0) {
       h += 1;
     } else if (h > 1) {
