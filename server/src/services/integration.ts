@@ -1,6 +1,6 @@
 import { of } from "rxjs";
 import { map } from "rxjs/operators";
-import { pulseBeat, rainbow } from "./patterns";
+import { pulseBeat, rainbow, rainbow2 } from "./patterns";
 import { TimeIndexableBeats } from "./utils";
 import { AppConfig, LedState } from "./vis";
 
@@ -27,6 +27,13 @@ export function createIntegration(
   });
 
   const rain = rainbow({
+    frameTimeSeconds,
+    durationSeconds: 6,
+    numLeds,
+    beats: beatSlice,
+  });
+
+  const rain2 = rainbow2({
     frameTimeSeconds,
     durationSeconds: 6,
     numLeds,

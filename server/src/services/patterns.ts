@@ -66,11 +66,22 @@ function createAnimationHelper(cb: (args: AnimationArgs) => LedState) {
 
 export const rainbow = createAnimationHelper(
   ({ animationPercent, state, numLeds }) => {
-    const scaleVal2 = (1 + Math.sin(animationPercent * (2 * Math.PI))) / 2;
+    const scaleVal2 = Math.sin(animationPercent * (2 * Math.PI));
 
     return state.map((_, i) => {
       const scaleVal = i / numLeds;
       return HSVtoRGB(scaleVal * scaleVal2, 1, 1);
+    });
+  }
+);
+
+export const rainbow2 = createAnimationHelper(
+  ({ animationPercent, state, numLeds }) => {
+    const scaleVal2 = 1 + Math.sin(animationPercent * (2 * Math.PI));
+
+    return state.map((_, i) => {
+      const scaleVal = i / numLeds;
+      return HSVtoRGB(scaleVal * i * scaleVal2, 1, 1);
     });
   }
 );
@@ -93,7 +104,7 @@ export const pulseBeat = createAnimationHelper(
 
     const { progress, start, duration, confidence } = currBeat;
     console.log(currBeat);
-    const scaleVal2 = Math.min(1, (progress - start) / duration);
+    const scaleVal2 = Math.min(1, (progress - start) / (duration * 2));
 
     return state.map((v) => scale(v, scaleVal2));
   }
