@@ -2,9 +2,9 @@ import { CleanWebpackPlugin } from "clean-webpack-plugin";
 import HTMLWebpackPlugin from "html-webpack-plugin";
 import path from "path";
 import { Configuration } from "webpack";
-import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin'
+import TsconfigPathsPlugin from "tsconfig-paths-webpack-plugin";
 
-delete process.env.TS_NODE_PROJECT
+delete process.env.TS_NODE_PROJECT;
 
 const config: Configuration = {
   mode: (process.env.NODE_ENV as any) ?? "development",
@@ -12,14 +12,12 @@ const config: Configuration = {
     app: "./src/index.tsx",
   },
   output: {
-    filename: '[name].js',
+    filename: "[name].js",
     path: path.resolve(__dirname, "dist"),
   },
   resolve: {
-    extensions: ['.wasm', '.mjs', '.js', '.json', '.ts', 'tsx'],
-    plugins: [
-     new TsconfigPathsPlugin(),
-    ]
+    extensions: [".wasm", ".mjs", ".js", ".json", ".ts", "tsx"],
+    plugins: [new TsconfigPathsPlugin()],
   },
   module: {
     rules: [
@@ -27,13 +25,12 @@ const config: Configuration = {
         test: /\.tsx?$/,
         use: [
           {
-            loader: 'ts-loader',
+            loader: "ts-loader",
             options: {
               transpileOnly: true,
-
-            }
-          }
-        ]
+            },
+          },
+        ],
       },
       {
         test: /.css$/,
@@ -42,10 +39,11 @@ const config: Configuration = {
     ],
   },
   plugins: [
-
     new CleanWebpackPlugin({ cleanStaleWebpackAssets: true }),
-    new HTMLWebpackPlugin({ title: "Output Management", template: './src/template.html' }),
-
+    new HTMLWebpackPlugin({
+      title: "Output Management",
+      template: "./src/template.html",
+    }),
   ],
   devtool: "source-map",
   devServer: {

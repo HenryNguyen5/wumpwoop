@@ -4,7 +4,7 @@ import mqtt, {
   IClientPublishOptions,
   IClientSubscribeOptions,
   ISubscriptionGrant,
-  Packet
+  Packet,
 } from "mqtt";
 import net from "net";
 import { Logger } from "pino";
@@ -13,7 +13,7 @@ import {
   bindCallback,
   fromEvent,
   Observable,
-  Subject
+  Subject,
 } from "rxjs";
 import {
   filter,
@@ -23,7 +23,7 @@ import {
   mapTo,
   takeWhile,
   tap,
-  withLatestFrom
+  withLatestFrom,
 } from "rxjs/operators";
 import { inject, injectable } from "tsyringe";
 import { AppConfig } from "./config";
@@ -54,8 +54,10 @@ export class MQTTBroker {
   }
 
   public listen(): Observable<void> {
-    this.logger.trace('Attempting to listen to port %d', this.config.port)
-    const listen = bindCallback<number, void>(this.server.listen.bind(this.server));
+    this.logger.trace("Attempting to listen to port %d", this.config.port);
+    const listen = bindCallback<number, void>(
+      this.server.listen.bind(this.server)
+    );
     return listen(this.config.port).pipe(
       tap(() => {
         this.logger.info(
@@ -132,7 +134,9 @@ export class MQTTClient {
       opts: IClientPublishOptions
     ) => Observable<[Error, ISubscriptionGrant[]]>;
 
-    const subscribe: SubscribeBind = bindCallback(this.client.subscribe.bind(this.client));
+    const subscribe: SubscribeBind = bindCallback(
+      this.client.subscribe.bind(this.client)
+    );
     return subscribe(topics, opts).pipe(
       map(([err, grants]) => {
         if (err) {

@@ -1,0 +1,23 @@
+{
+  "private": true,
+  "name": "ww",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "fmt": "prettier --write 'packages/**/*.{ts*,js*}'"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "dependencies": {
+    "eslint": "^7.4.0",
+    "prettier": "^2.0.5",
+    "typescript": "^3.9.6"
+  },
+  "devDependencies": {
+    "@types/eslint": "^7",
+    "@types/prettier": "^2",
+    "ts-node": "^8.10.2"
+  }
+}

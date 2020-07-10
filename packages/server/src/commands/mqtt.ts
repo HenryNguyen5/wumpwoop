@@ -64,9 +64,8 @@ export default class MQTT extends Command {
 
     const client = container.resolve(MQTTClient);
     client.subscribe("/lamp/master").subscribe({
-      next: ({message,topic}) => console.log({topic, message: message.toString('utf8')}),
+      next: ({ message, topic }) =>
+        console.log({ topic, message: message.toString("utf8") }),
     });
   }
-
-  
 }
