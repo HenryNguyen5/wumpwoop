@@ -1,0 +1,22 @@
+version: "3.7"
+
+services:
+  grpc-server:
+    image: ww/server
+    build:
+      context: ../../
+      dockerfile: packages/server/Dockerfile
+    entrypoint: ./bin/run
+    command: rpc rpc:start
+    ports: 
+      - '8082:8082'
+  grpc-server-proxy:
+    image: envoyproxy/envoy:v1.15.0
+    volumes:
+      - ./envoy.yaml:/etc/envoy/envoy.yaml
+    expose:
+      - "8081"
+      - "9902"
+    ports:
+      - "9902:9902"
+      - "8081:8081"

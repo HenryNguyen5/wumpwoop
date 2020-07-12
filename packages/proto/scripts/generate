@@ -1,0 +1,22 @@
+#!/bin/bash
+set -e
+rm -f ./*_pb*.js ./*_pb*.ts
+
+pushd protos > /dev/null
+OUTDIR=".."
+echo "$(which grpc_tools_node_protoc_plugin)"
+# Generate javascript bindings, and web bindings
+grpc_tools_node_protoc \
+	--js_out=import_style=commonjs,binary:$OUTDIR \
+	--grpc_out=grpc_js:$OUTDIR \
+	--plugin=protoc-gen-grpc="$(which grpc_tools_node_protoc_plugin)" \
+	--grpc-web_out=import_style=commonjs+dts,mode=grpcwebtext:$OUTDIR \
+	./*.proto
+
+# Generate server typescript definition bindings
+grpc_tools_node_protoc \
+  --plugin=protoc-gen-ts="$(which protoc-gen-ts)" \
+  --ts_out=$OUTDIR \
+	./*.proto
+
+popd > /dev/null

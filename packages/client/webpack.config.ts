@@ -48,7 +48,6 @@ const config: Configuration = {
   devtool: "source-map",
   devServer: {
     contentBase: "./dist",
-    bonjour: false,
     hot: true,
   },
 };

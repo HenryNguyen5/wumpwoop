@@ -1,0 +1,14 @@
+syntax = "proto3";
+package lamp;
+
+message HSV {
+  uint32 h = 1;
+  uint32 s = 2;
+  uint32 v = 3;
+}
+
+message Empty {}
+
+service Lamp {
+  rpc SetHSV(HSV) returns (Empty);
+}

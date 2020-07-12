@@ -27,11 +27,16 @@
   },
   "scripts": {
     "build": "TS_NODE_PROJECT=tsconfig.webpack.json webpack",
-    "dev": "TS_NODE_PROJECT=tsconfig.webpack.json webpack-dev-server"
+    "dev": "TS_NODE_PROJECT=tsconfig.webpack.json webpack-dev-server --host=0.0.0.0"
   },
   "dependencies": {
+    "@ww/proto": "0.0.1",
+    "axios": "^0.19.2",
+    "axios-observable": "^1.1.3",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
-    "rxjs": "^6.6.0"
+    "reflect-metadata": "^0.1.13",
+    "rxjs": "^6.6.0",
+    "tsyringe": "^4.3.0"
   }
 }

@@ -1,0 +1,21 @@
+{
+  "name": "@ww/proto",
+  "version": "0.0.1",
+  "license": "MIT",
+  "scripts": {
+    "build": "./scripts/generate",
+    "clean": "rm -f ./*_pb*.js ./*_pb*.ts"
+  },
+  "dependencies": {
+    "@grpc/grpc-js": "^1.1.2",
+    "@types/google-protobuf": "^3.7.2",
+    "google-protobuf": "^3.12.2",
+    "grpc": "^1.24.3",
+    "grpc-web": "^1.2.0"
+  },
+  "devDependencies": {
+    "grpc-tools": "^1.9.0",
+    "grpc_tools_node_protoc_ts": "^4.1.0",
+    "protoc-gen-grpc-web": "^1.2.0"
+  }
+}
