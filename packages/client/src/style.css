@@ -1,3 +1,11 @@
 .hello {
   color: blue;
 }
+
+
+.colour-temp {
+  background: rgb(255,167,87);
+  background: linear-gradient(90deg, rgba(255,167,87,1) 20%, rgba(255,193,141,1) 50%, rgba(243,242,255,1) 80%);
+  height: 200px;
+  width: 400px;
+}
